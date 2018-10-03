@@ -66,7 +66,7 @@ public class KeyAgreementSpi
         if (tmp[0] == 0 && tmp.length == expectedLength + 1)
         {
             byte[]    rv = new byte[tmp.length - 1];
-            
+
             System.arraycopy(tmp, 1, rv, 0, rv.length);
             return rv;
         }
@@ -79,10 +79,10 @@ public class KeyAgreementSpi
 
         return rv;
     }
-    
+
     protected Key engineDoPhase(
         Key     key,
-        boolean lastPhase) 
+        boolean lastPhase)
         throws InvalidKeyException, IllegalStateException
     {
         if (x == null)
@@ -114,7 +114,7 @@ public class KeyAgreementSpi
         return new BCDHPublicKey(result, pubKey.getParams());
     }
 
-    protected byte[] engineGenerateSecret() 
+    protected byte[] engineGenerateSecret()
         throws IllegalStateException
     {
         if (x == null)
@@ -127,7 +127,7 @@ public class KeyAgreementSpi
 
     protected int engineGenerateSecret(
         byte[]  sharedSecret,
-        int     offset) 
+        int     offset)
         throws IllegalStateException, ShortBufferException
     {
         if (x == null)
@@ -148,11 +148,17 @@ public class KeyAgreementSpi
     }
 
     protected SecretKey engineGenerateSecret(
-        String algorithm) 
+        String algorithm)
     {
         if (x == null)
         {
             throw new IllegalStateException("Diffie-Hellman not initialised.");
+        }
+
+        // for JSSE compatibility
+        if (algorithm.equals("TlsPremasterSecret"))
+        {
+            return new SecretKeySpec(trimZeroes(result.toByteArray()), algorithm);
         }
 
         String algKey = Strings.toUpperCase(algorithm);
@@ -169,7 +175,7 @@ public class KeyAgreementSpi
             {
                 DESParameters.setOddParity(key);
             }
-            
+
             return new SecretKeySpec(key, algorithm);
         }
 
@@ -179,7 +185,7 @@ public class KeyAgreementSpi
     protected void engineInit(
         Key                     key,
         AlgorithmParameterSpec  params,
-        SecureRandom            random) 
+        SecureRandom            random)
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
         if (!(key instanceof DHPrivateKey))
@@ -210,7 +216,7 @@ public class KeyAgreementSpi
 
     protected void engineInit(
         Key             key,
-        SecureRandom    random) 
+        SecureRandom    random)
         throws InvalidKeyException
     {
         if (!(key instanceof DHPrivateKey))
@@ -223,5 +229,27 @@ public class KeyAgreementSpi
         this.p = privKey.getParams().getP();
         this.g = privKey.getParams().getG();
         this.x = this.result = privKey.getX();
+    }
+
+    protected static byte[] trimZeroes(byte[] secret)
+    {
+        if (secret[0] != 0)
+        {
+            return secret;
+        }
+        else
+        {
+            int ind = 0;
+            while (ind < secret.length && secret[ind] == 0)
+            {
+                ind++;
+            }
+
+            byte[] rv = new byte[secret.length - ind];
+
+            System.arraycopy(secret, ind, rv, 0, rv.length);
+
+            return rv;
+        }
     }
 }
