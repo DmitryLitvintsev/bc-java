@@ -80,6 +80,25 @@ public class KeyAgreementSpi
         return rv;
     }
 
+
+    private byte[] bigIntToBytes_old(
+                                 BigInteger    r)
+    {
+        byte[]    tmp = r.toByteArray();
+
+        if (tmp[0] == 0)
+            {
+                byte[]    ntmp = new byte[tmp.length - 1];
+
+                System.arraycopy(tmp, 1, ntmp, 0, ntmp.length);
+                return ntmp;
+            }
+
+        return tmp;
+    }
+
+
+
     protected Key engineDoPhase(
         Key     key,
         boolean lastPhase)
@@ -158,7 +177,8 @@ public class KeyAgreementSpi
         // for JSSE compatibility
         if (algorithm.equals("TlsPremasterSecret"))
         {
-            return new SecretKeySpec(trimZeroes(result.toByteArray()), algorithm);
+            //return new SecretKeySpec(trimZeroes(result.toByteArray()), algorithm);
+            return new SecretKeySpec(bigIntToBytes_old(result), algorithm);
         }
 
         String algKey = Strings.toUpperCase(algorithm);
