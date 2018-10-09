@@ -8,7 +8,7 @@
     <property name="jdk.name" value="jdk1.5" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
     <property name="src.dir" value="${build.dir}/${jdk.name}" />
-    <property name="target.prefix" value="jdk15on" />
+    <property name="target.prefix" value="jdk15on-dcache" />
     <property name="javadoc.args" value="-breakiterator" />
 
     <target name="init">
@@ -75,10 +75,10 @@
             <formatter type="xml" toFile="${artifacts.dir}/checkstyle/${jdk.name}-errors.xml"/>
         </checkstyle>
     </target>
-    
+
     <target name="checkstyle-off" unless="checkstyle.on">
     </target>
-    
+
     <target name="build" depends="init">
         <ant antfile="ant/bc+-build.xml" dir="." />
         <ant antfile="ant/bc+-build.xml" dir="." target="javadoc-lw" />
